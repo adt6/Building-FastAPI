@@ -1,0 +1,122 @@
+[
+  {
+    "description": "Migraine",
+    "patient_id": 19
+  },
+  {
+    "description": "Depression",
+    "patient_id": 19
+  },
+  {
+    "description": "Anxiety",
+    "patient_id": 13
+  },
+  {
+    "description": "Diabetes",
+    "patient_id": 25
+  },
+  {
+    "description": "Migraine",
+    "patient_id": 6
+  },
+  {
+    "description": "Arthritis",
+    "patient_id": 14
+  },
+  {
+    "description": "Hypertension",
+    "patient_id": 2
+  },
+  {
+    "description": "Arthritis",
+    "patient_id": 13
+  },
+  {
+    "description": "Arthritis",
+    "patient_id": 8
+  },
+  {
+    "description": "Depression",
+    "patient_id": 24
+  },
+  {
+    "description": "Asthma",
+    "patient_id": 13
+  },
+  {
+    "description": "Depression",
+    "patient_id": 10
+  },
+  {
+    "description": "Diabetes",
+    "patient_id": 13
+  },
+  {
+    "description": "Depression",
+    "patient_id": 25
+  },
+  {
+    "description": "Depression",
+    "patient_id": 17
+  },
+  {
+    "description": "Diabetes",
+    "patient_id": 19
+  },
+  {
+    "description": "Depression",
+    "patient_id": 1
+  },
+  {
+    "description": "Asthma",
+    "patient_id": 2
+  },
+  {
+    "description": "Asthma",
+    "patient_id": 12
+  },
+  {
+    "description": "Depression",
+    "patient_id": 11
+  },
+  {
+    "description": "Hypertension",
+    "patient_id": 25
+  },
+  {
+    "description": "Arthritis",
+    "patient_id": 20
+  },
+  {
+    "description": "Asthma",
+    "patient_id": 17
+  },
+  {
+    "description": "Diabetes",
+    "patient_id": 20
+  },
+  {
+    "description": "Diabetes",
+    "patient_id": 1
+  },
+  {
+    "description": "Arthritis",
+    "patient_id": 9
+  },
+  {
+    "description": "Migraine",
+    "patient_id": 11
+  },
+  {
+    "description": "Hypertension",
+    "patient_id": 3
+  },
+  {
+    "description": "Anxiety",
+    "patient_id": 1
+  },
+  {
+    "description": "Migraine",
+    "patient_id": 21
+  }
+]

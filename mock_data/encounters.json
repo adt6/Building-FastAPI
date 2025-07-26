@@ -1,0 +1,202 @@
+[
+  {
+    "date": "2024-09-04",
+    "patient_id": 18,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2022-11-05",
+    "patient_id": 12,
+    "practitioner_id": 5
+  },
+  {
+    "date": "2024-07-26",
+    "patient_id": 16,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2024-07-18",
+    "patient_id": 18,
+    "practitioner_id": 5
+  },
+  {
+    "date": "2024-11-18",
+    "patient_id": 14,
+    "practitioner_id": 3
+  },
+  {
+    "date": "2023-08-17",
+    "patient_id": 25,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2024-05-10",
+    "patient_id": 7,
+    "practitioner_id": 5
+  },
+  {
+    "date": "2024-08-01",
+    "patient_id": 20,
+    "practitioner_id": 3
+  },
+  {
+    "date": "2023-05-28",
+    "patient_id": 5,
+    "practitioner_id": 3
+  },
+  {
+    "date": "2024-09-16",
+    "patient_id": 2,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2023-03-30",
+    "patient_id": 6,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2024-05-19",
+    "patient_id": 5,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2022-11-25",
+    "patient_id": 13,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2024-08-03",
+    "patient_id": 12,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2023-12-07",
+    "patient_id": 9,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2023-10-31",
+    "patient_id": 9,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2024-08-21",
+    "patient_id": 21,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2025-01-14",
+    "patient_id": 2,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2024-12-10",
+    "patient_id": 16,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2024-09-17",
+    "patient_id": 24,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2023-11-26",
+    "patient_id": 17,
+    "practitioner_id": 5
+  },
+  {
+    "date": "2024-05-29",
+    "patient_id": 20,
+    "practitioner_id": 3
+  },
+  {
+    "date": "2025-05-18",
+    "patient_id": 7,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2024-11-09",
+    "patient_id": 22,
+    "practitioner_id": 3
+  },
+  {
+    "date": "2025-05-07",
+    "patient_id": 25,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2023-04-11",
+    "patient_id": 15,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2025-02-27",
+    "patient_id": 14,
+    "practitioner_id": 5
+  },
+  {
+    "date": "2023-03-17",
+    "patient_id": 1,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2024-11-13",
+    "patient_id": 19,
+    "practitioner_id": 3
+  },
+  {
+    "date": "2023-05-07",
+    "patient_id": 1,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2023-02-25",
+    "patient_id": 1,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2023-09-13",
+    "patient_id": 1,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2025-07-07",
+    "patient_id": 10,
+    "practitioner_id": 2
+  },
+  {
+    "date": "2023-04-15",
+    "patient_id": 23,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2025-01-16",
+    "patient_id": 16,
+    "practitioner_id": 5
+  },
+  {
+    "date": "2024-10-07",
+    "patient_id": 22,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2024-12-21",
+    "patient_id": 10,
+    "practitioner_id": 1
+  },
+  {
+    "date": "2023-05-22",
+    "patient_id": 1,
+    "practitioner_id": 4
+  },
+  {
+    "date": "2023-01-04",
+    "patient_id": 14,
+    "practitioner_id": 3
+  },
+  {
+    "date": "2024-05-05",
+    "patient_id": 3,
+    "practitioner_id": 3
+  }
+]
