@@ -15,15 +15,17 @@ A beginner-friendly, real-world FastAPI project for managing healthcare data usi
 
 ---
 
+```markdown
 ## 🏗️ Project Structure
 
+```text
 app/
-├── database.py # SQLAlchemy engine/session
-├── main.py # FastAPI app entry point
-├── models/ # SQLAlchemy models
-├── routes/ # API endpoints
-├── schemas/ # Pydantic schemas
-└── utils/ # Utilities (optional)
+├── database.py           # SQLAlchemy engine/session
+├── main.py               # FastAPI app entry point
+├── models/               # SQLAlchemy models
+├── routes/               # API endpoints
+├── schemas/              # Pydantic schemas
+└── utils/                # Utilities (optional)
 
 mock_data/
 ├── patients.json
