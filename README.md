@@ -37,7 +37,7 @@ mock_data/
 
 ---
 
-##🧪 API Documentation
+## 🧪 API Documentation
 
 Once running, open http://localhost:8000/docs for the interactive Swagger UI.
 
@@ -52,7 +52,7 @@ DELETE /patients/{id}
 
 (Also available for practitioners, encounters, and conditions)
 
-##🗃️ Tech Stack
+## 🗃️ Tech Stack
 
 FastAPI
 
