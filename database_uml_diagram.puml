@@ -1,0 +1,124 @@
+@startuml Healthcare Database Schema
+
+!define TABLE(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define PK primary key
+!define FK foreign key
+
+' Organizations
+TABLE(organizations_v2, "Organizations") {
+  PK id : Integer
+  identifier : String
+  name : String
+  type_code : String
+  type_display : String
+  phone : String
+  email : String
+  address_line : String
+  city : String
+  state : String
+  postal_code : String
+  part_of_identifier : String
+}
+
+' Patients
+TABLE(patients_v2, "Patients") {
+  PK id : Integer
+  identifier : String
+  first_name : String
+  last_name : String
+  birth_date : Date
+  gender : String
+  phone : String
+  email : String
+  address_line : String
+  city : String
+  state : String
+  postal_code : String
+  marital_status : String
+  language : String
+  race : String
+  ethnicity : String
+  deceased_date : String
+  active : Boolean
+  managing_organization_identifier : String
+}
+
+' Practitioners
+TABLE(practitioners_v2, "Practitioners") {
+  PK id : Integer
+  identifier : String
+  name : String
+  gender : String
+  specialty_code : String
+  specialty_display : String
+  phone : String
+  email : String
+  FK organization_id : Integer
+}
+
+' Encounters
+TABLE(encounters_v2, "Encounters") {
+  PK id : Integer
+  FK patient_id : Integer
+  FK practitioner_id : Integer
+  FK organization_id : Integer
+  identifier : String
+  status : String
+  class_code : String
+  class_display : String
+  start_time : DateTime
+  end_time : DateTime
+  reason_code : String
+  reason_display : String
+}
+
+' Conditions
+TABLE(conditions_v2, "Conditions") {
+  PK id : Integer
+  FK patient_id : Integer
+  FK encounter_id : Integer
+  code : String
+  system : String
+  display : String
+  category_code : String
+  clinical_status : String
+  verification_status : String
+  onset_time : DateTime
+  abatement_time : DateTime
+  recorded_date : DateTime
+}
+
+' Observations
+TABLE(observations_v2, "Observations") {
+  PK id : Integer
+  FK patient_id : Integer
+  FK encounter_id : Integer
+  FK practitioner_id : Integer
+  identifier : String
+  status : String
+  code : String
+  code_system : String
+  code_display : String
+  value_quantity : Float
+  value_unit : String
+  value_string : String
+  effective_time : DateTime
+  issued_time : DateTime
+}
+
+' Relationships
+organizations_v2 ||--o{ practitioners_v2 : "employs"
+organizations_v2 ||--o{ encounters_v2 : "hosts"
+organizations_v2 ||--o{ patients_v2 : "manages"
+
+patients_v2 ||--o{ encounters_v2 : "has"
+patients_v2 ||--o{ conditions_v2 : "has"
+patients_v2 ||--o{ observations_v2 : "has"
+
+practitioners_v2 ||--o{ encounters_v2 : "conducts"
+practitioners_v2 ||--o{ observations_v2 : "performs"
+
+encounters_v2 ||--o{ conditions_v2 : "diagnoses"
+encounters_v2 ||--o{ observations_v2 : "includes"
+
+@enduml
