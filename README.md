@@ -252,36 +252,206 @@ GET /api/v2/health
 Response: {"status": "ok", "api": "v2"}
 ```
 
-### **Example Endpoints (v2)**(implementing)
+### **Complete API Endpoints (v2) - IMPLEMENTED ✅**
 
-#### **Patients**
+#### **🏥 Patients**
 ```bash
-POST /api/v2/patients          # Create new patient
-GET /api/v2/patients/{id}      # Get patient by ID
-PUT /api/v2/patients/{id}      # Update patient
-DELETE /api/v2/patients/{id}   # Delete patient
-GET /api/v2/patients           # List all patients
+GET    /api/v2/patients           # List patients with filtering
+GET    /api/v2/patients/{id}      # Get patient by ID
+POST   /api/v2/patients           # Create new patient
+PUT    /api/v2/patients/{id}      # Update patient
+DELETE /api/v2/patients/{id}      # Delete patient
+
+# Query Parameters for GET /api/v2/patients:
+# - limit, offset (pagination)
+# - identifier, first_name, last_name, active (filtering)
 ```
 
-#### **Encounters**
+#### **🏥 Encounters**
 ```bash
-POST /api/v2/encounters        # Create new encounter
-GET /api/v2/encounters/{id}    # Get encounter by ID
-GET /api/v2/encounters         # List encounters (with filters)
+GET    /api/v2/encounters         # List encounters with patient-based filtering
+GET    /api/v2/encounters/{id}    # Get encounter by ID
+POST   /api/v2/encounters         # Create new encounter
+PUT    /api/v2/encounters/{id}    # Update encounter
+DELETE /api/v2/encounters/{id}    # Delete encounter
+
+# Query Parameters for GET /api/v2/encounters:
+# - patient_id (patient-based filtering)
+# - practitioner_id, organization_id, status
+# - start_from, start_to (date range)
+# - class_code, limit, offset
 ```
 
-#### **Conditions**
+#### **🩺 Conditions**
 ```bash
-POST /api/v2/conditions        # Create new condition
-GET /api/v2/conditions/{id}    # Get condition by ID
-GET /api/v2/conditions         # List conditions by patient
+GET    /api/v2/conditions         # List conditions with patient-based filtering
+GET    /api/v2/conditions/{id}    # Get condition by ID
+POST   /api/v2/conditions         # Create new condition
+PUT    /api/v2/conditions/{id}    # Update condition
+DELETE /api/v2/conditions/{id}    # Delete condition
+
+# Query Parameters for GET /api/v2/conditions:
+# - patient_id (patient-based filtering)
+# - encounter_id, code, clinical_status
+# - verification_status, category_code
+# - onset_from, onset_to (date range)
 ```
 
-#### **Observations**
+#### **🏢 Organizations**
 ```bash
-POST /api/v2/observations      # Create new observation
-GET /api/v2/observations/{id}  # Get observation by ID
-GET /api/v2/observations       # List observations by patient
+GET    /api/v2/organizations      # List organizations with filtering
+GET    /api/v2/organizations/{id} # Get organization by ID
+POST   /api/v2/organizations      # Create new organization
+PUT    /api/v2/organizations/{id} # Update organization
+DELETE /api/v2/organizations/{id} # Delete organization
+
+# Query Parameters for GET /api/v2/organizations:
+# - name, type_code, city, state
+# - identifier, limit, offset
+```
+
+#### **👨‍⚕️ Practitioners**
+```bash
+GET    /api/v2/practitioners      # List practitioners with organization-based filtering
+GET    /api/v2/practitioners/{id} # Get practitioner by ID
+POST   /api/v2/practitioners      # Create new practitioner
+PUT    /api/v2/practitioners/{id} # Update practitioner
+DELETE /api/v2/practitioners/{id} # Delete practitioner
+
+# Query Parameters for GET /api/v2/practitioners:
+# - organization_id (organization-based filtering)
+# - name, specialty_code, gender
+# - identifier, limit, offset
+```
+
+### **🔍 Advanced Filtering Examples**
+
+#### **Patient-Based Filtering**
+```bash
+# Get all encounters for patient 123
+GET /api/v2/encounters?patient_id=123
+
+# Get all conditions for patient 123
+GET /api/v2/conditions?patient_id=123
+
+# Get active conditions for patient 123
+GET /api/v2/conditions?patient_id=123&clinical_status=active
+
+# Get encounters for patient 123 in date range
+GET /api/v2/encounters?patient_id=123&start_from=2024-01-01&start_to=2024-12-31
+```
+
+#### **Organization-Based Filtering**
+```bash
+# Get all practitioners at organization 1
+GET /api/v2/practitioners?organization_id=1
+
+# Get all cardiologists at organization 1
+GET /api/v2/practitioners?organization_id=1&specialty_code=cardiology
+
+# Get all hospitals in New York
+GET /api/v2/organizations?state=NY&type_code=hospital
+```
+
+#### **Cross-Entity Queries**
+```bash
+# Get practitioners named "Smith"
+GET /api/v2/practitioners?name=Smith
+
+# Get organizations with "City" in name
+GET /api/v2/organizations?name=City
+
+# Get completed encounters
+GET /api/v2/encounters?status=completed
+
+# Get confirmed conditions
+GET /api/v2/conditions?verification_status=confirmed
+```
+
+---
+
+## 🏗️ API Architecture & Features
+
+### **✅ Implemented Features**
+
+#### **1. Complete CRUD Operations**
+- **Create**: POST endpoints for all entities
+- **Read**: GET endpoints with filtering and pagination
+- **Update**: PUT endpoints for partial updates
+- **Delete**: DELETE endpoints with proper error handling
+
+#### **2. Advanced Filtering System**
+- **Patient-Based Filtering**: Get encounters and conditions for specific patients
+- **Organization-Based Filtering**: Get practitioners at specific organizations
+- **Date Range Filtering**: Filter by time periods (onset, start, end dates)
+- **Status Filtering**: Filter by clinical status, verification status, encounter status
+- **Text Search**: Partial matching on names, codes, and identifiers
+
+#### **3. Pagination & Performance**
+- **Limit/Offset Pagination**: Control result set size
+- **Default Limits**: 20 items per page, max 100
+- **Ordered Results**: Consistent sorting for better UX
+- **Database Indexes**: Optimized queries on frequently filtered fields
+
+#### **4. Data Validation & Error Handling**
+- **Pydantic Schemas**: Request/response validation
+- **HTTP Status Codes**: Proper REST status codes (200, 201, 204, 404)
+- **Error Messages**: Clear, descriptive error responses
+- **Input Validation**: Query parameter constraints and validation
+
+#### **5. API Documentation**
+- **Swagger UI**: Interactive API documentation at `/docs`
+- **ReDoc**: Alternative documentation at `/redoc`
+- **OpenAPI Schema**: Machine-readable API specification
+- **Endpoint Descriptions**: Detailed documentation for each endpoint
+
+### **🔗 API Relationships**
+
+```
+Patient (Central Entity)
+├── Encounters (visits, appointments)
+├── Conditions (diagnoses, problems)
+└── Observations (measurements, test results)
+
+Organization (Healthcare Facility)
+├── Practitioners (doctors, nurses)
+└── Encounters (hosted visits)
+
+Practitioner (Healthcare Provider)
+├── Encounters (conducted visits)
+└── Observations (performed tests)
+```
+
+### **📊 Response Formats**
+
+#### **List Endpoints**
+```json
+[
+  {
+    "id": 1,
+    "patient_id": 123,
+    "status": "completed",
+    "start_time": "2024-01-15T10:00:00"
+  }
+]
+```
+
+#### **Single Item Endpoints**
+```json
+{
+  "id": 1,
+  "first_name": "John",
+  "last_name": "Doe",
+  "birth_date": "1990-05-15",
+  "active": true
+}
+```
+
+#### **Error Responses**
+```json
+{
+  "detail": "Patient not found"
+}
 ```
 
 ---
@@ -306,8 +476,8 @@ GET /api/v2/observations       # List observations by patient
 ### **Using Docker (Recommended)**
 ```bash
 # Clone the repository
-git clone https://github.com/adt6/Building-FastAPI.git
-cd Building-FastAPI
+git clone <your-repository-url>
+cd your-project-directory
 
 # Start the services
 docker-compose up -d
@@ -325,11 +495,75 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up database
-python create_tables.py
+# Set up database (if not already done)
+python app_v2/create_tables_v2.py
 
 # Run the application
 uvicorn app_v2.main:app --reload
+
+# The API will be available at http://localhost:8000
+# Interactive docs at http://localhost:8000/docs
+```
+
+### **🚀 Quick API Testing**
+
+#### **1. Start the Server**
+```bash
+# Navigate to your project directory
+cd your-project-directory
+
+# Activate virtual environment
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Start the server
+uvicorn app_v2.main:app --reload
+```
+
+#### **2. Open Interactive Documentation**
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+#### **3. Test Patient-Based Filtering**
+```bash
+# Get all encounters for a patient
+curl "http://localhost:8000/api/v2/encounters?patient_id=1&limit=5"
+
+# Get all conditions for a patient
+curl "http://localhost:8000/api/v2/conditions?patient_id=1&limit=5"
+
+# Get all patients
+curl "http://localhost:8000/api/v2/patients?limit=10"
+```
+
+#### **4. Test Organization-Based Filtering**
+```bash
+# Get practitioners at an organization
+curl "http://localhost:8000/api/v2/practitioners?organization_id=1&limit=5"
+
+# Get organizations by type
+curl "http://localhost:8000/api/v2/organizations?type_code=hospital&limit=5"
+```
+
+#### **5. Create New Records**
+```bash
+# Create a new patient
+curl -X POST "http://localhost:8000/api/v2/patients" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "birth_date": "1990-05-15",
+    "email": "john@example.com"
+  }'
+
+# Create a new encounter
+curl -X POST "http://localhost:8000/api/v2/encounters" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "patient_id": 1,
+    "status": "completed",
+    "start_time": "2024-01-15T10:00:00"
+  }'
 ```
 
 ---
@@ -364,6 +598,71 @@ pytest
 
 # Test database connection
 python test_db_conn.py
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### **Common Issues & Solutions**
+
+#### **1. Server Won't Start**
+```bash
+# Check if port 8000 is already in use
+lsof -ti:8000 | xargs kill -9
+
+# Restart the server
+uvicorn app_v2.main:app --reload
+```
+
+#### **2. Database Connection Issues**
+```bash
+# Test database connection
+python test_db_conn.py
+
+# Check if tables exist
+python app_v2/create_tables_v2.py
+```
+
+#### **3. Import Errors**
+```bash
+# Make sure you're in the correct directory
+cd your-project-directory
+
+# Activate virtual environment
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Check if all dependencies are installed
+pip install -r requirements.txt
+```
+
+#### **4. No Data in API Responses**
+```bash
+# Check if data exists in database
+python -c "
+from app_v2.database import SessionLocal
+from app_v2.models.patient import PatientV2
+db = SessionLocal()
+count = db.query(PatientV2).count()
+print(f'Patients in database: {count}')
+db.close()
+"
+
+# Import sample data if needed
+python scripts/import_patients_v2.py
+```
+
+#### **5. API Endpoints Not Found**
+- Make sure you're using the correct URL: `http://localhost:8000/api/v2/`
+- Check that the server is running: `http://localhost:8000/docs`
+- Verify the endpoint exists in the Swagger UI
+
+### **Health Check**
+```bash
+# Test if API is running
+curl http://localhost:8000/api/v2/health
+
+# Expected response: {"status": "ok", "api": "v2"}
 ```
 
 ---
