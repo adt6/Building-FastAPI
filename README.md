@@ -79,19 +79,19 @@ The app_v2 implements a comprehensive healthcare data model with 6 core entities
 
 ```mermaid
 erDiagram
-    ORGANIZATIONS ||--o{ PRACTITIONERS : "employs"
-    ORGANIZATIONS ||--o{ ENCOUNTERS : "hosts"
-    ORGANIZATIONS ||--o{ PATIENTS : "manages"
+    ORGANIZATIONS ||--o{ PRACTITIONERS : employs
+    ORGANIZATIONS ||--o{ ENCOUNTERS : hosts
+    ORGANIZATIONS ||--o{ PATIENTS : manages
     
-    PATIENTS ||--o{ ENCOUNTERS : "has"
-    PATIENTS ||--o{ CONDITIONS : "has"
-    PATIENTS ||--o{ OBSERVATIONS : "has"
+    PATIENTS ||--o{ ENCOUNTERS : has
+    PATIENTS ||--o{ CONDITIONS : has
+    PATIENTS ||--o{ OBSERVATIONS : has
     
-    PRACTITIONERS ||--o{ ENCOUNTERS : "conducts"
-    PRACTITIONERS ||--o{ OBSERVATIONS : "performs"
+    PRACTITIONERS ||--o{ ENCOUNTERS : conducts
+    PRACTITIONERS ||--o{ OBSERVATIONS : performs
     
-    ENCOUNTERS ||--o{ CONDITIONS : "diagnoses"
-    ENCOUNTERS ||--o{ OBSERVATIONS : "includes"
+    ENCOUNTERS ||--o{ CONDITIONS : diagnoses
+    ENCOUNTERS ||--o{ OBSERVATIONS : includes
 ```
 
 ### **Key Design Principles:**

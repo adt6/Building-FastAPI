@@ -5,3 +5,11 @@ psycopg2-binary
 pydantic
 python-dotenv
 pytest
+
+# AI Agent dependencies
+langchain
+langchain-openai
+langchain-community
+streamlit
+requests
+pyyaml
