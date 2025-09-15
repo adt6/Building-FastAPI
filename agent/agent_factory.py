@@ -7,7 +7,9 @@ from pathlib import Path
 from datetime import datetime
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain.prompts import PromptTemplate
+from langchain import hub
 from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 
 from . import agent_config
 
@@ -51,9 +53,31 @@ def get_llm():
         # TODO: Add Anthropic Claude Sonnet support
         raise NotImplementedError("Anthropic Claude Sonnet not implemented yet. Please use OPENAI_LLM_TYPE for now.")
     
+    elif agent_config.DEFAULT_LLM_TYPE == agent_config.LLAMA_GROQ_LLM_TYPE:
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("Please set GROQ_API_KEY environment variable.")
+        
+        return ChatGroq(
+            model=agent_config.MODEL_ID_LLAMA_GROQ,  # llama3-70b-8192
+            temperature=0.1,
+            api_key=api_key
+        )
+    
+    elif agent_config.DEFAULT_LLM_TYPE == agent_config.MIXTRAL_LLM_TYPE:
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("Please set GROQ_API_KEY environment variable.")
+        
+        return ChatGroq(
+            model=agent_config.MODEL_ID_MIXTRAL_GROQ,  # mixtral-8x7b-32768
+            temperature=0.1,
+            api_key=api_key
+        )
+    
     elif agent_config.DEFAULT_LLM_TYPE == agent_config.HAIKU_LLM_TYPE:
         # TODO: Add Anthropic Claude Haiku support
-        raise NotImplementedError("Anthropic Claude Haiku not implemented yet. Please use OPENAI_LLM_TYPE for now.")
+        raise NotImplementedError("Anthropic Claude Haiku not implemented yet. Please use MIXTRAL_LLM_TYPE for now.")
     
     else:
         raise ValueError(f"Unknown LLM type: {agent_config.DEFAULT_LLM_TYPE}. Please check agent_config.py")
@@ -71,32 +95,67 @@ def create_assistant() -> AgentExecutor:
     llm = get_llm()
     
     # Step 3: Get tools (functions to call your API)
-    # TODO: We'll add this later
-    tools = []  # For now, no tools
+    from .tools.patient_tools import (
+        get_patient_info,
+        search_patients,
+        get_patient_conditions,
+        get_patient_encounters,
+        get_patient_summary
+    )
+    from .tools.encounter_tools import (
+        get_encounter_details,
+        search_encounters,
+        get_encounters_by_date_range,
+        get_encounters_by_practitioner,
+        get_encounters_by_organization,
+        get_encounter_statistics
+    )
+    
+    tools = [
+        get_patient_info,
+        search_patients,
+        get_patient_conditions,
+        get_patient_encounters,
+        get_patient_summary,
+        get_encounter_details,
+        search_encounters,
+        get_encounters_by_date_range,
+        get_encounters_by_practitioner,
+        get_encounters_by_organization,
+        get_encounter_statistics
+    ]
     
     # Step 4: Create prompt template (how to format conversations)
-    prompt = PromptTemplate.from_template("""
+    # Use the standard ReAct prompt template
+    prompt = hub.pull("hwchase17/react")
+    
+    # Add our clinical instructions to the prompt
+    clinical_instructions = f"""
 {instructions}
 
-You have access to the following tools:
-{tools}
+You are a clinical AI assistant that helps healthcare professionals access patient information.
+Use the available tools to retrieve and format patient data in a professional, clinical manner.
 
-Use the following format:
+CRITICAL INSTRUCTION: When you receive patient information from tools, you MUST ALWAYS 
+provide a natural, conversational summary in paragraph form. NEVER display the raw 
+structured data with headers like "PATIENT INFORMATION" or "CONTACT INFORMATION". 
 
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question
+Instead, write a flowing summary like: "John Doe is a 45-year-old male patient with ID 123..."
 
-Begin!
+ALWAYS summarize patient data in natural language - this is mandatory for all patient queries.
 
-Question: {input}
-Thought: {agent_scratchpad}
-""")
+IMPORTANT SEARCH GUIDELINES:
+- When searching for patients by name, if given a single name like "Robert854", use ONLY the first_name parameter
+- Do NOT split single names into first_name and last_name unless explicitly told to do so
+- For single names, use: search_patients(first_name="Robert854")
+- Only use both first_name and last_name when the user explicitly provides both parts
+- CRITICAL: When calling tools, pass parameter values correctly - use first_name="Maxwell782" NOT first_name="first_name=Maxwell782"
+- For patient tools, use: patient_identifier=2 NOT patient_identifier="2" (avoid quotes around numbers)
+
+"""
+    
+    # Update the prompt template with our clinical instructions
+    prompt.template = clinical_instructions + prompt.template
     
     # Step 5: Create the agent (combines LLM + tools + prompt)
     agent = create_react_agent(
@@ -106,12 +165,14 @@ Thought: {agent_scratchpad}
     )
     
     # Step 6: Create agent executor (handles the conversation flow)
+    #agent_executor is essentially a conversational AI interface that you can ask questions to, and it will use your healthcare API tools to find answers!
     agent_executor = AgentExecutor(
         agent=agent,
         tools=tools,
         verbose=True,           # Show thinking process
         max_iterations=5,       # Max steps to answer
-        early_stopping_method="generate"
+        early_stopping_method="generate",
+        handle_parsing_errors=True  # Handle output parsing errors gracefully
     )
     
     return agent_executor
