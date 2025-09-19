@@ -114,6 +114,14 @@ def display_header():
     """Display the main header."""
     st.markdown('<h1 class="main-header">🏥 Clinical AI Assistant</h1>', unsafe_allow_html=True)
     
+    # Add description
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 2rem; color: #666;">
+        <p style="font-size: 1.1rem;">Intelligent healthcare data assistant powered by LangChain and Groq</p>
+        <p style="font-size: 0.9rem;">Ask questions about patients, medical conditions, and encounters using natural language</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     # Status indicators
     col1, col2, col3 = st.columns(3)
     
@@ -141,61 +149,125 @@ def display_header():
         if st.button("🤖 Load AI Agent", use_container_width=True):
             load_agent()
             st.rerun()
+    
+    # Quick stats
+    if api_online and agent_loaded:
+        st.success("✅ System Ready! You can start asking questions about patients and medical data.")
 
 def display_sidebar():
     """Display the sidebar with examples and information."""
     with st.sidebar:
         st.header("📋 Quick Examples")
         
-        example_queries = [
-            "Get patient information for patient ID 1",
-            "Get patient information for patient ID 5cbc121b-cd71-4428-b8b7-31e53eba8184",
-            "Search for patients named John",
-            "Show me all encounters for patient 1",
-            "What conditions does patient 1 have?",
-            "Get encounter statistics",
-            "Search encounters by date range",
-            "Find encounters by practitioner ID 1",
-            "Get a complete patient summary for patient 1"
+        # Patient Information Examples
+        st.subheader("👤 Patient Information")
+        patient_examples = [
+            "Get patient information for patient ID 2",
+            "Get patient information for patient ID 3", 
+            "Search for patients named Robert854",
+            "Search for patients with first name Maxwell",
+            "Get a complete patient summary for patient 4"
         ]
         
-        for query in example_queries:
-            if st.button(f"💬 {query}", key=f"example_{query}", use_container_width=True):
+        for query in patient_examples:
+            if st.button(f"💬 {query}", key=f"patient_{query}", use_container_width=True):
+                st.session_state.user_input = query
+                st.rerun()
+        
+        # Medical Conditions Examples
+        st.subheader("🏥 Medical Conditions")
+        condition_examples = [
+            "What conditions does patient 2 have?",
+            "Show me all medical conditions for patient 3",
+            "Get patient conditions for patient ID 4"
+        ]
+        
+        for query in condition_examples:
+            if st.button(f"💬 {query}", key=f"condition_{query}", use_container_width=True):
+                st.session_state.user_input = query
+                st.rerun()
+        
+        # Medical Encounters Examples
+        st.subheader("📅 Medical Encounters")
+        encounter_examples = [
+            "Show me all encounters for patient 2",
+            "Get patient encounters for patient ID 3",
+            "What encounters has patient 4 had?"
+        ]
+        
+        for query in encounter_examples:
+            if st.button(f"💬 {query}", key=f"encounter_{query}", use_container_width=True):
                 st.session_state.user_input = query
                 st.rerun()
         
         st.divider()
         
         st.header("🛠️ Available Tools")
-        st.markdown("""
-        **Patient Tools:**
-        - Get patient info
-        - Search patients
-        - Get patient conditions
-        - Get patient encounters
-        - Get patient summary
         
-        **Encounter Tools:**
-        - Get encounter details
-        - Search encounters
-        - Filter by date/practitioner/organization
-        - Get encounter statistics
-        """)
+        # Patient Tools
+        with st.expander("👤 Patient Tools", expanded=True):
+            st.markdown("""
+            **🔍 Search & Find:**
+            - `search_patients()` - Find patients by name, demographics
+            - `get_patient_info()` - Get basic patient details
+            
+            **📊 Patient Data:**
+            - `get_patient_conditions()` - Medical conditions
+            - `get_patient_encounters()` - Medical encounters  
+            - `get_patient_summary()` - Complete overview
+            """)
+        
+        # Tool Examples
+        with st.expander("💡 Tool Usage Examples"):
+            st.markdown("""
+            **Search by Name:**
+            - "Search for patients named Robert854"
+            - "Find patients with first name Maxwell"
+            
+            **Get Patient Data:**
+            - "Get patient information for patient ID 2"
+            - "What conditions does patient 3 have?"
+            - "Show me encounters for patient 4"
+            
+            **Complete Summary:**
+            - "Get a complete patient summary for patient 2"
+            """)
+        
+        # Data Insights
+        with st.expander("📈 Data Insights"):
+            st.markdown("""
+            **Current Database:**
+            - Multiple patients with unique IDs
+            - Medical conditions (sinusitis, hypertension, etc.)
+            - Medical encounters (AMB type)
+            - Patient demographics and contact info
+            
+            **Sample Patient IDs:**
+            - Patient 2: Zula72 Ondricka197
+            - Patient 3: Robert854 Botsford977  
+            - Patient 4: Will178 Lang846
+            """)
         
         st.divider()
         
-        st.header("ℹ️ Instructions")
+        st.header("ℹ️ How to Use")
         st.markdown("""
-        1. **Start your FastAPI server** if not running:
-           ```bash
-           uvicorn app_v2.main:app --reload --port 8000
-           ```
+        **🚀 Getting Started:**
+        1. **FastAPI Server** must be running on port 8000
+        2. **AI Agent** loads automatically on first query
+        3. **Use natural language** - ask questions naturally
+        4. **Click examples** in sidebar for quick queries
         
-        2. **Ask questions** about patients and encounters
+        **💬 Example Queries:**
+        - "Get patient information for patient ID 2"
+        - "Search for patients named Robert854"
+        - "What conditions does patient 3 have?"
+        - "Show me all encounters for patient 4"
         
-        3. **Use natural language** - the AI will understand
-        
-        4. **Check the sidebar** for example queries
+        **🔧 Troubleshooting:**
+        - Check FastAPI server status (green = online)
+        - Click "Load AI Agent" if agent shows offline
+        - Use "Test Agent Loading" for debugging
         """)
         
         st.divider()

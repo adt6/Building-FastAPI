@@ -102,27 +102,13 @@ def create_assistant() -> AgentExecutor:
         get_patient_encounters,
         get_patient_summary
     )
-    from .tools.encounter_tools import (
-        get_encounter_details,
-        search_encounters,
-        get_encounters_by_date_range,
-        get_encounters_by_practitioner,
-        get_encounters_by_organization,
-        get_encounter_statistics
-    )
     
     tools = [
         get_patient_info,
         search_patients,
         get_patient_conditions,
         get_patient_encounters,
-        get_patient_summary,
-        get_encounter_details,
-        search_encounters,
-        get_encounters_by_date_range,
-        get_encounters_by_practitioner,
-        get_encounters_by_organization,
-        get_encounter_statistics
+        get_patient_summary
     ]
     
     # Step 4: Create prompt template (how to format conversations)
@@ -149,7 +135,10 @@ IMPORTANT SEARCH GUIDELINES:
 - Do NOT split single names into first_name and last_name unless explicitly told to do so
 - For single names, use: search_patients(first_name="Robert854")
 - Only use both first_name and last_name when the user explicitly provides both parts
-- CRITICAL: When calling tools, pass parameter values correctly - use first_name="Maxwell782" NOT first_name="first_name=Maxwell782"
+- CRITICAL: When calling tools, pass parameter values correctly:
+  * Use first_name="Maxwell782" NOT first_name="first_name=Maxwell782"
+  * Use first_name="Robert854", last_name="Botsford977" NOT first_name="first_name=Robert854, last_name=Botsford977"
+  * Each parameter should be passed separately, not concatenated into one string
 - For patient tools, use: patient_identifier=2 NOT patient_identifier="2" (avoid quotes around numbers)
 
 """

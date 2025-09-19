@@ -27,12 +27,16 @@ def get_patient_info(patient_identifier: str) -> str:
         if clean_identifier.isdigit():
             response = api_client.get(f"/patients/{clean_identifier}")
         else:
-            # Search by identifier (UUID/MRN)
+            # Search by identifier (UUID/MRN) - should be unique
             response = api_client.get("/patients", params={"identifier": clean_identifier})
-            if isinstance(response, list) and len(response) > 0:
-                response = response[0]  # Take the first match
-            elif isinstance(response, list) and len(response) == 0:
-                return f"No patient found with identifier: {clean_identifier}"
+            if isinstance(response, list):
+                if len(response) == 0:
+                    return f"No patient found with identifier: {clean_identifier}"
+                elif len(response) == 1:
+                    response = response[0]  # Take the single result
+                else:
+                    # This should never happen for UUIDs, but handle gracefully
+                    return f"Multiple patients found with identifier: {clean_identifier}. Please use a more specific identifier."
         
         if "error" in response:
             return f"Error retrieving patient {clean_identifier}: {response['error']}"
@@ -68,18 +72,49 @@ def search_patients(
         search_patients(last_name="Koepp521")
     """
     try:
+        # Clean input parameters - remove any parameter formatting
+        clean_first_name = first_name.strip() if first_name else None
+        clean_last_name = last_name.strip() if last_name else None
+        clean_birth_date = birth_date.strip() if birth_date else None
+        clean_gender = gender.strip() if gender else None
+        
+        # Handle complex parameter formatting issues
+        # Case: first_name="Robert854", last_name="Botsford977" (all in one string)
+        if clean_first_name and "," in clean_first_name and "last_name=" in clean_first_name:
+            # This is a combined string like: first_name="Robert854", last_name="Botsford977"
+            parts = clean_first_name.split(",")
+            for part in parts:
+                part = part.strip()
+                if "first_name=" in part:
+                    clean_first_name = part.split("first_name=")[1].strip().strip('"')
+                elif "last_name=" in part:
+                    clean_last_name = part.split("last_name=")[1].strip().strip('"')
+        
+        # Case: Single parameter with quotes (e.g., first_name="Maxwell782")
+        elif clean_first_name and "=" in clean_first_name and "first_name=" in clean_first_name:
+            clean_first_name = clean_first_name.split("first_name=")[1].strip().strip('"')
+        
+        # Case: Single parameter with quotes (e.g., last_name="Smith123")
+        elif clean_last_name and "=" in clean_last_name and "last_name=" in clean_last_name:
+            clean_last_name = clean_last_name.split("last_name=")[1].strip().strip('"')
+        
         # Build query parameters
         params = {}
-        if first_name:
-            params['first_name'] = first_name
-        if last_name:
-            params['last_name'] = last_name
-        if birth_date:
-            params['birth_date'] = birth_date
-        if gender:
-            params['gender'] = gender
+        if clean_first_name:
+            params['first_name'] = clean_first_name
+        if clean_last_name:
+            params['last_name'] = clean_last_name
+        if clean_birth_date:
+            params['birth_date'] = clean_birth_date
+        if clean_gender:
+            params['gender'] = clean_gender
         if limit:
             params['limit'] = min(limit, 100)  # Cap at 100
+        
+        # Debug logging (can be removed in production)
+        # print(f"DEBUG: Original inputs - first_name='{first_name}', last_name='{last_name}'")
+        # print(f"DEBUG: Cleaned inputs - first_name='{clean_first_name}', last_name='{clean_last_name}'")
+        # print(f"DEBUG: Final params: {params}")
         
         response = api_client.get("/patients", params=params)
         
@@ -94,7 +129,10 @@ def search_patients(
         # Format the results
         result = f"Found {len(patients)} patient(s):\n\n"
         for i, patient in enumerate(patients[:10], 1):  # Show max 10
-            result += f"{i}. {format_patient_summary(patient)}\n\n"
+            result += f"{i}. **{patient.get('name', 'Unknown')}** (ID: {patient.get('id', 'Unknown')})\n"
+            result += f"   Birth Date: {patient.get('birth_date', 'Unknown')}\n"
+            result += f"   Gender: {patient.get('gender', 'Unknown')}\n"
+            result += f"   Status: {patient.get('status', 'Unknown')}\n\n"
         
         if len(patients) > 10:
             result += f"... and {len(patients) - 10} more patients."
