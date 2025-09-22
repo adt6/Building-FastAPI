@@ -32,13 +32,19 @@ def load_and_format_instructions() -> str:
     return instructions
 
 
-def get_llm():
+def get_llm(model_type=None):
     """
-    Create and configure the LLM (Language Model) based on DEFAULT_LLM_TYPE.
+    Create and configure the LLM (Language Model) based on model_type or DEFAULT_LLM_TYPE.
     This is the "brain" of our AI assistant.
+    
+    Args:
+        model_type (str, optional): The type of model to use. If None, uses DEFAULT_LLM_TYPE.
     """
-    # Choose model based on DEFAULT_LLM_TYPE from config
-    if agent_config.DEFAULT_LLM_TYPE == agent_config.OPENAI_LLM_TYPE:
+    # Use provided model_type or fall back to DEFAULT_LLM_TYPE
+    selected_model_type = model_type or agent_config.DEFAULT_LLM_TYPE
+    
+    # Choose model based on selected model type
+    if selected_model_type == agent_config.OPENAI_LLM_TYPE:
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("Please set OPENAI_API_KEY environment variable")
@@ -49,11 +55,11 @@ def get_llm():
             api_key=api_key
         )
     
-    elif agent_config.DEFAULT_LLM_TYPE == agent_config.SONNET_LLM_TYPE:
+    elif selected_model_type == agent_config.SONNET_LLM_TYPE:
         # TODO: Add Anthropic Claude Sonnet support
         raise NotImplementedError("Anthropic Claude Sonnet not implemented yet. Please use OPENAI_LLM_TYPE for now.")
     
-    elif agent_config.DEFAULT_LLM_TYPE == agent_config.LLAMA_GROQ_LLM_TYPE:
+    elif selected_model_type == agent_config.LLAMA_GROQ_LLM_TYPE:
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError("Please set GROQ_API_KEY environment variable.")
@@ -64,7 +70,7 @@ def get_llm():
             api_key=api_key
         )
     
-    elif agent_config.DEFAULT_LLM_TYPE == agent_config.MIXTRAL_LLM_TYPE:
+    elif selected_model_type == agent_config.MIXTRAL_LLM_TYPE:
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError("Please set GROQ_API_KEY environment variable.")
@@ -75,24 +81,51 @@ def get_llm():
             api_key=api_key
         )
     
-    elif agent_config.DEFAULT_LLM_TYPE == agent_config.HAIKU_LLM_TYPE:
+    elif selected_model_type == agent_config.HAIKU_LLM_TYPE:
         # TODO: Add Anthropic Claude Haiku support
         raise NotImplementedError("Anthropic Claude Haiku not implemented yet. Please use MIXTRAL_LLM_TYPE for now.")
     
+    elif selected_model_type == agent_config.GEMINI_LLM_TYPE:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("Please set GEMINI_API_KEY environment variable.")
+        
+        import sys
+        print(f"\n🤖 DEBUG: Creating Gemini LLM with model: {agent_config.MODEL_ID_GEMINI}", file=sys.stderr)
+        
+        # Import ChatGoogleGenerativeAI for Gemini support
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            print("✅ DEBUG: Successfully imported ChatGoogleGenerativeAI", file=sys.stderr)
+        except ImportError:
+            raise ImportError("Please install langchain-google-genai: pip install langchain-google-genai")
+        
+        llm = ChatGoogleGenerativeAI(
+            model=agent_config.MODEL_ID_GEMINI,  # gemini-2.5-flash
+            temperature=0.1,
+            google_api_key=api_key
+        )
+        
+        print(f"✅ DEBUG: Gemini LLM created successfully\n", file=sys.stderr)
+        return llm
+    
     else:
-        raise ValueError(f"Unknown LLM type: {agent_config.DEFAULT_LLM_TYPE}. Please check agent_config.py")
+        raise ValueError(f"Unknown LLM type: {selected_model_type}. Please check agent_config.py")
 
 
-def create_assistant() -> AgentExecutor:
+def create_assistant(model_type=None) -> AgentExecutor:
     """
     Main factory method - creates a fully configured AI assistant.
     This combines all components: instructions, LLM, tools, and prompts.
+    
+    Args:
+        model_type (str, optional): The type of model to use. If None, uses DEFAULT_LLM_TYPE.
     """
     # Step 1: Load instructions (how the AI should behave)
     instructions = load_and_format_instructions()
     
     # Step 2: Create LLM (the AI brain)
-    llm = get_llm()
+    llm = get_llm(model_type)
     
     # Step 3: Get tools (functions to call your API)
     from .tools.patient_tools import (
@@ -110,6 +143,11 @@ def create_assistant() -> AgentExecutor:
         get_patient_encounters,
         get_patient_summary
     ]
+    
+    import sys
+    print(f"🛠️ DEBUG: Loaded {len(tools)} tools for agent", file=sys.stderr)
+    for i, tool in enumerate(tools, 1):
+        print(f"   {i}. {tool.name}: {tool.description[:50]}...", file=sys.stderr)
     
     # Step 4: Create prompt template (how to format conversations)
     # Use the standard ReAct prompt template
@@ -147,6 +185,7 @@ IMPORTANT SEARCH GUIDELINES:
     prompt.template = clinical_instructions + prompt.template
     
     # Step 5: Create the agent (combines LLM + tools + prompt)
+    print(f"🤖 DEBUG: Creating ReAct agent with {model_type or 'default'} model", file=sys.stderr)
     agent = create_react_agent(
         llm=llm,
         tools=tools,
@@ -155,13 +194,13 @@ IMPORTANT SEARCH GUIDELINES:
     
     # Step 6: Create agent executor (handles the conversation flow)
     #agent_executor is essentially a conversational AI interface that you can ask questions to, and it will use your healthcare API tools to find answers!
+    print(f"🔄 DEBUG: Creating AgentExecutor with verbose=True", file=sys.stderr)
     agent_executor = AgentExecutor(
         agent=agent,
         tools=tools,
         verbose=True,           # Show thinking process
-        max_iterations=5,       # Max steps to answer
-        early_stopping_method="generate",
+        max_iterations=20,      # Max steps to answer (increased for complex queries)
         handle_parsing_errors=True  # Handle output parsing errors gracefully
     )
-    
+    print(f"✅ DEBUG: AgentExecutor created successfully", file=sys.stderr)
     return agent_executor

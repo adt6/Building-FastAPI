@@ -6,6 +6,10 @@ import subprocess
 import sys
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def check_requirements():
     """Check if all requirements are installed."""
@@ -21,18 +25,25 @@ def check_requirements():
         return False
 
 def check_env_file():
-    """Check if .env file exists and has API key."""
+    """Check if .env file exists and has API keys."""
     env_file = Path(".env")
     if not env_file.exists():
         print("❌ .env file not found")
-        print("Please create .env file with your Groq API key")
+        print("Please create .env file with your API keys")
         return False
     
-    with open(env_file) as f:
-        content = f.read()
-        if "your-groq-api-key-here" in content:
-            print("❌ Please update .env file with your actual Groq API key")
-            return False
+    # Check if API keys are set in environment
+    groq_key = os.getenv("GROQ_API_KEY")
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    
+    if not groq_key:
+        print("❌ GROQ_API_KEY not found in environment")
+        return False
+    
+    if not gemini_key:
+        print("⚠️  GEMINI_API_KEY not found - Gemini model will not be available")
+    else:
+        print("✅ GEMINI_API_KEY found")
     
     print("✅ .env file configured")
     return True

@@ -96,16 +96,25 @@ def check_api_status():
         st.session_state.api_status = "offline"
         return False
 
-def load_agent():
-    """Load the AI agent."""
+def load_agent(model_type=None):
+    """Load the AI agent with specified model type."""
     try:
-        if st.session_state.agent is None:
-            with st.spinner("Loading AI agent..."):
+        # Check if we need to reload the agent (different model type)
+        current_model = st.session_state.get('selected_model', None)
+        if st.session_state.agent is None or current_model != model_type:
+            import sys
+            print(f"🔄 STREAMLIT: Loading agent with model: {model_type}", file=sys.stderr)
+            print(f"🔄 STREAMLIT: Previous model was: {current_model}", file=sys.stderr)
+            
+            with st.spinner(f"Loading AI agent with {model_type or 'default'} model..."):
                 from agent.agent_factory import create_assistant
-                st.session_state.agent = create_assistant()
-                st.success("✅ AI agent loaded successfully!")
+                st.session_state.agent = create_assistant(model_type)
+                st.session_state.selected_model = model_type
+                st.success(f"✅ AI agent loaded successfully with {model_type or 'default'} model!")
         return st.session_state.agent
     except Exception as e:
+        import sys
+        print(f"❌ STREAMLIT: Failed to load agent: {str(e)}", file=sys.stderr)
         st.error(f"❌ Failed to load AI agent: {str(e)}")
         st.error("Please check your configuration and try refreshing the page.")
         return None
@@ -147,7 +156,7 @@ def display_header():
     if st.session_state.agent is None:
         st.warning("⚠️ AI Agent not loaded. Click the button below to load it manually.")
         if st.button("🤖 Load AI Agent", use_container_width=True):
-            load_agent()
+            load_agent(st.session_state.get('selected_model', None))
             st.rerun()
     
     # Quick stats
@@ -157,6 +166,46 @@ def display_header():
 def display_sidebar():
     """Display the sidebar with examples and information."""
     with st.sidebar:
+        # Model Selection
+        st.header("🤖 AI Model Selection")
+        
+        # Import agent config for model options
+        from agent import agent_config
+        
+        model_options = {
+            "Llama 3.3 70B (Groq)": agent_config.LLAMA_GROQ_LLM_TYPE,
+            "Mistral Saba 24B (Groq)": agent_config.MIXTRAL_LLM_TYPE,
+            "Gemini 2.5 Flash (Free)": agent_config.GEMINI_LLM_TYPE,
+            "GPT-4o Mini (OpenAI)": agent_config.OPENAI_LLM_TYPE,
+        }
+        
+        # Get current model or default
+        current_model = st.session_state.get('selected_model', agent_config.DEFAULT_LLM_TYPE)
+        
+        # Find the display name for current model
+        current_display = "Llama 3.3 70B (Groq)"  # default
+        for display_name, model_type in model_options.items():
+            if model_type == current_model:
+                current_display = display_name
+                break
+        
+        selected_display = st.selectbox(
+            "Choose AI Model:",
+            options=list(model_options.keys()),
+            index=list(model_options.keys()).index(current_display),
+            help="Select which AI model to use for responses. Gemini is free!"
+        )
+        
+        selected_model_type = model_options[selected_display]
+        
+        # If model changed, reload agent
+        if selected_model_type != current_model:
+            st.session_state.agent = None  # Force reload
+            st.session_state.selected_model = selected_model_type
+            st.rerun()
+        
+        st.divider()
+        
         st.header("📋 Quick Examples")
         
         # Patient Information Examples
@@ -308,14 +357,22 @@ def handle_user_input():
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    agent = load_agent()
+                    agent = load_agent(st.session_state.get('selected_model', None))
                     if agent:
+                        import sys
+                        print(f"🤖 STREAMLIT: Invoking agent with prompt: {prompt[:50]}...", file=sys.stderr)
                         response = agent.invoke({"input": prompt})
                         ai_response = response['output']
+                        print(f"✅ STREAMLIT: Agent response received", file=sys.stderr)
                     else:
                         ai_response = "❌ AI agent is not available. Please check the configuration."
                 except Exception as e:
-                    ai_response = f"❌ Error: {str(e)}"
+                    # Check if it's an iteration limit error but we still got a response
+                    if "iteration limit" in str(e).lower() or "time limit" in str(e).lower():
+                        # The agent might have generated a response before hitting the limit
+                        ai_response = f"⚠️ Response was cut off due to complexity. The agent was processing your request but hit the iteration limit. Please try breaking your question into smaller parts.\n\nError details: {str(e)}"
+                    else:
+                        ai_response = f"❌ Error: {str(e)}"
             
             # Check if the response contains HTML formatting
             if "<div style=" in ai_response or "<h3" in ai_response or "<h4" in ai_response:
@@ -352,14 +409,22 @@ def main():
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    agent = load_agent()
+                    agent = load_agent(st.session_state.get('selected_model', None))
                     if agent:
+                        import sys
+                        print(f"🤖 STREAMLIT: Invoking agent with prompt: {prompt[:50]}...", file=sys.stderr)
                         response = agent.invoke({"input": prompt})
                         ai_response = response['output']
+                        print(f"✅ STREAMLIT: Agent response received", file=sys.stderr)
                     else:
                         ai_response = "❌ AI agent is not available. Please check the configuration."
                 except Exception as e:
-                    ai_response = f"❌ Error: {str(e)}"
+                    # Check if it's an iteration limit error but we still got a response
+                    if "iteration limit" in str(e).lower() or "time limit" in str(e).lower():
+                        # The agent might have generated a response before hitting the limit
+                        ai_response = f"⚠️ Response was cut off due to complexity. The agent was processing your request but hit the iteration limit. Please try breaking your question into smaller parts.\n\nError details: {str(e)}"
+                    else:
+                        ai_response = f"❌ Error: {str(e)}"
             
             # Check if the response contains HTML formatting
             if "<div style=" in ai_response or "<h3" in ai_response or "<h4" in ai_response:
