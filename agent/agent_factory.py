@@ -200,7 +200,8 @@ IMPORTANT SEARCH GUIDELINES:
         tools=tools,
         verbose=True,           # Show thinking process
         max_iterations=20,      # Max steps to answer (increased for complex queries)
-        handle_parsing_errors=True  # Handle output parsing errors gracefully
+        handle_parsing_errors=True,  # Handle output parsing errors gracefully
+        return_intermediate_steps=True  # Return intermediate steps for debugging
     )
     print(f"✅ DEBUG: AgentExecutor created successfully", file=sys.stderr)
     return agent_executor
