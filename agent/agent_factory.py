@@ -10,6 +10,7 @@ from langchain.prompts import PromptTemplate
 from langchain import hub
 from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
+from langchain.memory import ConversationBufferMemory
 
 from . import agent_config
 
@@ -133,6 +134,7 @@ def create_assistant(model_type=None) -> AgentExecutor:
         search_patients,
         get_patient_conditions,
         get_patient_encounters,
+        get_patient_observations,
         get_patient_summary
     )
     
@@ -141,6 +143,7 @@ def create_assistant(model_type=None) -> AgentExecutor:
         search_patients,
         get_patient_conditions,
         get_patient_encounters,
+        get_patient_observations,
         get_patient_summary
     ]
     
@@ -168,6 +171,12 @@ Instead, write a flowing summary like: "John Doe is a 45-year-old male patient w
 
 ALWAYS summarize patient data in natural language - this is mandatory for all patient queries.
 
+MEMORY INSTRUCTIONS:
+- You have access to conversation history to understand context
+- Use previous messages to understand follow-up questions
+- If a user asks "What are their conditions?" after discussing a patient, you know which patient they mean
+- Maintain context throughout the conversation
+
 IMPORTANT SEARCH GUIDELINES:
 - When searching for patients by name, if given a single name like "Robert854", use ONLY the first_name parameter
 - Do NOT split single names into first_name and last_name unless explicitly told to do so
@@ -181,10 +190,26 @@ IMPORTANT SEARCH GUIDELINES:
 
 """
     
-    # Update the prompt template with our clinical instructions
+    # Update the prompt template with our clinical instructions and memory
     prompt.template = clinical_instructions + prompt.template
     
-    # Step 5: Create the agent (combines LLM + tools + prompt)
+    # Add chat history to the prompt template
+    if "chat_history" not in prompt.template:
+        prompt.template = prompt.template.replace(
+            "{input}", 
+            "Previous conversation:\n{chat_history}\n\nCurrent question: {input}"
+        )
+    
+    # Step 5: Create conversation memory
+    print(f"🧠 DEBUG: Creating conversation memory", file=sys.stderr)
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        return_messages=True,
+        output_key="output"
+    )
+    print(f"🧠 DEBUG: Memory created with key: chat_history", file=sys.stderr)
+    
+    # Step 6: Create the agent (combines LLM + tools + prompt)
     print(f"🤖 DEBUG: Creating ReAct agent with {model_type or 'default'} model", file=sys.stderr)
     agent = create_react_agent(
         llm=llm,
@@ -192,12 +217,13 @@ IMPORTANT SEARCH GUIDELINES:
         prompt=prompt
     )
     
-    # Step 6: Create agent executor (handles the conversation flow)
+    # Step 7: Create agent executor (handles the conversation flow)
     #agent_executor is essentially a conversational AI interface that you can ask questions to, and it will use your healthcare API tools to find answers!
-    print(f"🔄 DEBUG: Creating AgentExecutor with verbose=True", file=sys.stderr)
+    print(f"🔄 DEBUG: Creating AgentExecutor with memory and verbose=True", file=sys.stderr)
     agent_executor = AgentExecutor(
         agent=agent,
         tools=tools,
+        memory=memory,          # Add conversation memory
         verbose=True,           # Show thinking process
         max_iterations=20,      # Max steps to answer (increased for complex queries)
         handle_parsing_errors=True,  # Handle output parsing errors gracefully

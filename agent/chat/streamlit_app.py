@@ -270,107 +270,54 @@ def display_sidebar():
         
         st.divider()
         
-        # Reset button
-        if st.button("🔄 Reset to Default", use_container_width=True, help="Clear all selections and start fresh"):
-            st.session_state.selected_model = None
-            st.session_state.agent = None
-            st.rerun()
-        
-        st.divider()
-        
         st.header("📋 Quick Examples")
         
-        # Patient Information Examples
-        st.subheader("👤 Patient Information")
-        patient_examples = [
+        # Simple Examples
+        st.subheader("🟢 Simple Questions")
+        simple_examples = [
             "Get patient information for patient ID 2",
             "Get patient information for patient ID 3", 
             "Search for patients named Robert854",
             "Search for patients with first name Maxwell",
-            "Get a complete patient summary for patient 4"
-        ]
-        
-        for query in patient_examples:
-            if st.button(f"💬 {query}", key=f"patient_{query}", use_container_width=True):
-                # Process the example directly
-                process_message(query)
-                st.rerun()
-        
-        # Medical Conditions Examples
-        st.subheader("🏥 Medical Conditions")
-        condition_examples = [
             "What conditions does patient 2 have?",
-            "Show me all medical conditions for patient 3",
-            "Get patient conditions for patient ID 4"
+            "Show me all encounters for patient 3"
         ]
         
-        for query in condition_examples:
-            if st.button(f"💬 {query}", key=f"condition_{query}", use_container_width=True):
-                # Process the example directly
+        for query in simple_examples:
+            if st.button(f"💬 {query}", key=f"simple_{query}", use_container_width=True):
                 process_message(query)
                 st.rerun()
         
-        # Medical Encounters Examples
-        st.subheader("📅 Medical Encounters")
-        encounter_examples = [
-            "Show me all encounters for patient 2",
-            "Get patient encounters for patient ID 3",
-            "What encounters has patient 4 had?"
+        # Medium Examples
+        st.subheader("🟡 Medium Questions")
+        medium_examples = [
+            "Get a complete patient summary for patient 2",
+            "What are the observations for patient 3?",
+            "Show me all medical conditions for patient 4",
+            "Get patient encounters for patient ID 5",
+            "Search for patients with last name Smith",
+            "What are the medical observations for patient 2?"
         ]
         
-        for query in encounter_examples:
-            if st.button(f"💬 {query}", key=f"encounter_{query}", use_container_width=True):
-                # Process the example directly
+        for query in medium_examples:
+            if st.button(f"💬 {query}", key=f"medium_{query}", use_container_width=True):
                 process_message(query)
                 st.rerun()
         
-        st.divider()
+        # Complex Examples
+        st.subheader("🔴 Complex Questions")
+        complex_examples = [
+            "Compare the medical conditions between patient 2 and patient 3. Which patient has more complex health issues?",
+            "Analyze the medical patterns across patients 2, 3, and 4. Which patient has the most diverse range of medical conditions?",
+            "Compare the encounter history between patient 2 and patient 5. Who has had more medical visits?",
+            "What are the key differences in treatment history between patient 2 and patient 3?",
+            "Analyze the health trends for patient 3 based on their observations and conditions"
+        ]
         
-        st.header("🛠️ Available Tools")
-        
-        # Patient Tools
-        with st.expander("👤 Patient Tools", expanded=True):
-            st.markdown("""
-            **🔍 Search & Find:**
-            - `search_patients()` - Find patients by name, demographics
-            - `get_patient_info()` - Get basic patient details
-            
-            **📊 Patient Data:**
-            - `get_patient_conditions()` - Medical conditions
-            - `get_patient_encounters()` - Medical encounters  
-            - `get_patient_summary()` - Complete overview
-            """)
-        
-        # Tool Examples
-        with st.expander("💡 Tool Usage Examples"):
-            st.markdown("""
-            **Search by Name:**
-            - "Search for patients named Robert854"
-            - "Find patients with first name Maxwell"
-            
-            **Get Patient Data:**
-            - "Get patient information for patient ID 2"
-            - "What conditions does patient 3 have?"
-            - "Show me encounters for patient 4"
-            
-            **Complete Summary:**
-            - "Get a complete patient summary for patient 2"
-            """)
-        
-        # Data Insights
-        with st.expander("📈 Data Insights"):
-            st.markdown("""
-            **Current Database:**
-            - Multiple patients with unique IDs
-            - Medical conditions (sinusitis, hypertension, etc.)
-            - Medical encounters (AMB type)
-            - Patient demographics and contact info
-            
-            **Sample Patient IDs:**
-            - Patient 2: Zula72 Ondricka197
-            - Patient 3: Robert854 Botsford977  
-            - Patient 4: Will178 Lang846
-            """)
+        for query in complex_examples:
+            if st.button(f"💬 {query}", key=f"complex_{query}", use_container_width=True):
+                process_message(query)
+                st.rerun()
         
         st.divider()
         
@@ -378,19 +325,19 @@ def display_sidebar():
         st.markdown("""
         **🚀 Getting Started:**
         1. **FastAPI Server** must be running on port 8000
-        2. **AI Agent** loads automatically on first query
+        2. **AI Model** loads automatically when selected
         3. **Use natural language** - ask questions naturally
         4. **Click examples** in sidebar for quick queries
         
-        **💬 Example Queries:**
-        - "Get patient information for patient ID 2"
-        - "Search for patients named Robert854"
-        - "What conditions does patient 3 have?"
-        - "Show me all encounters for patient 4"
+        **💡 Tips:**
+        - Start with simple questions to test the system
+        - Use patient IDs (2, 3, 4, 5) for best results
+        - Try complex questions to test AI reasoning
+        - The agent remembers context in conversations
         
         **🔧 Troubleshooting:**
         - Check FastAPI server status (green = online)
-        - Click "Load AI Agent" if agent shows offline
+        - Select an AI model from the dropdown above
         - Use "Test Agent Loading" for debugging
         """)
         

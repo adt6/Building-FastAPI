@@ -313,3 +313,59 @@ def format_encounter_summary(encounter_data: Dict[str, Any]) -> str:
     class_code = encounter_data.get('class_code', 'Unknown')
     
     return f"Encounter: {class_code}\nStatus: {status}\nStart Time: {start_time}"
+
+@tool
+def get_patient_observations(patient_identifier: str) -> str:
+    """
+    Get all medical observations (lab results, vital signs, etc.) for a specific patient.
+    
+    Args:
+        patient_identifier (str): The patient ID or medical record number
+        
+    Returns:
+        str: Formatted list of patient observations
+    """
+    try:
+        # Clean the patient identifier
+        clean_identifier = patient_identifier.strip()
+        if "=" in clean_identifier:
+            clean_identifier = clean_identifier.split("=")[1].strip()
+        
+        # Remove quotes if present
+        if clean_identifier.startswith('"') and clean_identifier.endswith('"'):
+            clean_identifier = clean_identifier[1:-1]
+        elif clean_identifier.startswith("'") and clean_identifier.endswith("'"):
+            clean_identifier = clean_identifier[1:-1]
+        
+        # Get patient observations from API
+        observations_data = api_client.get(f"/observations?patient_id={clean_identifier}")
+        
+        if not observations_data:
+            return f"No observations found for patient {clean_identifier}"
+        
+        # Format observations
+        formatted_observations = []
+        for i, observation in enumerate(observations_data, 1):
+            formatted_obs = format_observation_summary(observation)
+            formatted_observations.append(f"{i}. {formatted_obs}")
+        
+        return f"Patient {clean_identifier} has {len(observations_data)} observation(s):\n" + "\n".join(formatted_observations)
+        
+    except Exception as e:
+        return f"Error retrieving observations for patient {patient_identifier}: {str(e)}"
+
+# Helper function for observation formatting
+def format_observation_summary(observation_data: Dict[str, Any]) -> str:
+    """Format observation data into a human-readable summary."""
+    if "error" in observation_data:
+        return f"Error retrieving observation: {observation_data['error']}"
+    
+    observation_type = observation_data.get('observation_type', 'Unknown')
+    value = observation_data.get('value', 'Unknown')
+    unit = observation_data.get('unit', '')
+    date = observation_data.get('date', 'Unknown')
+    status = observation_data.get('status', 'Unknown')
+    
+    value_str = f"{value} {unit}".strip() if unit else str(value)
+    
+    return f"Observation: {observation_type}\nValue: {value_str}\nDate: {date}\nStatus: {status}"

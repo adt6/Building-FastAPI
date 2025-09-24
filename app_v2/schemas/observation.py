@@ -1,23 +1,22 @@
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-from app_v2.database import Base
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
 
-class ObservationV2(Base):
-    __tablename__ = "observations_v2"
+class ObservationResponse(BaseModel):
+    id: int
+    patient_id: int
+    encounter_id: Optional[int] = None
+    practitioner_id: Optional[int] = None
+    identifier: Optional[str] = None
+    status: str
+    code: str
+    code_system: Optional[str] = None
+    code_display: Optional[str] = None
+    value_quantity: Optional[float] = None
+    value_unit: Optional[str] = None
+    value_string: Optional[str] = None
+    effective_time: Optional[datetime] = None
+    issued_time: Optional[datetime] = None
 
-    id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(Integer, ForeignKey("patients_v2.id"), nullable=False)
-    encounter_id = Column(Integer, ForeignKey("encounters_v2.id"), nullable=True)
-
-    status = Column(String, nullable=True)
-    category_code = Column(String, nullable=True)
-    code = Column(String, nullable=False)
-    system = Column(String, nullable=True)
-    display = Column(String, nullable=True)
-    value_num = Column(Numeric, nullable=True)
-    unit = Column(String, nullable=True)
-    value_text = Column(String, nullable=True)
-    effective_time = Column(DateTime, nullable=True)
-
-    patient = relationship("PatientV2")
-    encounter = relationship("EncounterV2")
+    class Config:
+        from_attributes = True
